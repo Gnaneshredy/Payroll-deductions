@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll Calculator</title>
+    <script>
+        async function calculatePayroll(event) {
+            event.preventDefault();
+
+            const hourlyRate = document.getElementById('hourlyRate').value;
+            const hoursWorked = document.getElementById('hoursWorked').value;
+
+            const response = await fetch(`/api/payroll/calculate?hourlyRate=${hourlyRate}&hoursWorked=${hoursWorked}`);
+            const result = await response.json();
+
+            document.getElementById('grossPay').innerText = `Gross Pay: ${result.grossPay}`;
+            document.getElementById('deductions').innerText = `Deductions: ${result.deductions}`;
+            document.getElementById('netPay').innerText = `Net Pay: ${result.netPay}`;
+        }
+    </script>
+</head>
+<body>
+<h1>Payroll Calculator</h1>
+<form onsubmit="calculatePayroll(event)">
+    <label for="hourlyRate">Hourly Rate:</label>
+    <input type="number" id="hourlyRate" name="hourlyRate" step="0.01" required><br><br>
+
+    <label for="hoursWorked">Hours Worked:</label>
+    <input type="number" id="hoursWorked" name="hoursWorked" step="0.01" required><br><br>
+
+    <button type="submit">Calculate</button>
+</form>
+
+<h2>Results</h2>
+<p id="grossPay">Gross Pay: </p>
+<p id="deductions">Deductions: </p>
+<p id="netPay">Net Pay: </p>
+</body>
+</html>
