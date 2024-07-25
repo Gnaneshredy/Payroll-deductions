@@ -1,14 +1,12 @@
 package com.example.Payroll.Controller;
 
-
-//package com.example.payroll.Controller;
-
-//import com.example.payroll.Service.PayrollService;
+import com.example.Payroll.Service.PayrollService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
+
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -25,31 +23,40 @@ public class PayrollControllerTest {
 
     @Test
     public void testCalculatePayroll() throws Exception {
-        when(payrollService.calculateGrossPay(20.0, 40.0)).thenReturn(800.0);
-        when(payrollService.calculateDeductions(800.0)).thenReturn(160.0);
-        when(payrollService.calculateNetPay(800.0, 160.0)).thenReturn(640.0);
+        double hourlyRate = 30.0;
+        double hoursWorked = 50.0;
+        double grossPay = 1500.0;
+        double federalIncomeTax = 150.0;
+        double stateIncomeTax = 75.0;
+        double socialSecurityTax = 93.0;
+        double medicareTax = 21.75;
+        double healthInsurance = 200.0;
+        double retirementContributions = 45.0;
+        double totalDeductions = federalIncomeTax + stateIncomeTax + socialSecurityTax + medicareTax + healthInsurance + retirementContributions;
+        double netPay = grossPay - totalDeductions;
+
+        when(payrollService.calculateGrossPay(hourlyRate, hoursWorked)).thenReturn(grossPay);
+        when(payrollService.calculateFederalIncomeTax(grossPay)).thenReturn(federalIncomeTax);
+        when(payrollService.calculateStateIncomeTax(grossPay)).thenReturn(stateIncomeTax);
+        when(payrollService.calculateSocialSecurityTax(grossPay)).thenReturn(socialSecurityTax);
+        when(payrollService.calculateMedicareTax(grossPay)).thenReturn(medicareTax);
+        when(payrollService.calculateHealthInsurance(grossPay)).thenReturn(healthInsurance);
+        when(payrollService.calculateRetirementContributions(grossPay)).thenReturn(retirementContributions);
+        when(payrollService.calculateDeductions(grossPay)).thenReturn(totalDeductions);
+        when(payrollService.calculateNetPay(grossPay, totalDeductions)).thenReturn(netPay);
 
         mockMvc.perform(get("/api/payroll/calculate")
-                        .param("hourlyRate", "20.0")
-                        .param("hoursWorked", "40.0"))
+                        .param("hourlyRate", String.valueOf(hourlyRate))
+                        .param("hoursWorked", String.valueOf(hoursWorked)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.grossPay").value(800.0))
-                .andExpect(jsonPath("$.deductions").value(160.0))
-                .andExpect(jsonPath("$.netPay").value(640.0));
-    }
-
-    private class PayrollService {
-        public Object calculateGrossPay(double v, double v1) {
-            return null;
-        }
-
-        public Object calculateDeductions(double v) {
-            return null;
-        }
-
-        public Object calculateNetPay(double v, double v1) {
-            return null;
-        }
+                .andExpect(jsonPath("$.grossPay").value(grossPay))
+                .andExpect(jsonPath("$.federalIncomeTax").value(federalIncomeTax))
+                .andExpect(jsonPath("$.stateIncomeTax").value(stateIncomeTax))
+                .andExpect(jsonPath("$.socialSecurityTax").value(socialSecurityTax))
+                .andExpect(jsonPath("$.medicareTax").value(medicareTax))
+                .andExpect(jsonPath("$.healthInsurance").value(healthInsurance))
+                .andExpect(jsonPath("$.retirementContributions").value(retirementContributions))
+                .andExpect(jsonPath("$.totalDeductions").value(totalDeductions))
+                .andExpect(jsonPath("$.netPay").value(netPay));
     }
 }
-
